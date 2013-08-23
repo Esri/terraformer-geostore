@@ -22,7 +22,7 @@
     "url": "https://github.com/Esri/terraformer-geostore/issues"
   },
   "dependencies": {
-    "terraformer": "0.1.x"
+    "terraformer": "1.0.x"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
