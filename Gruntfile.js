@@ -41,18 +41,13 @@ module.exports = function (grunt) {
         src: [
           "browser/terraformer-geostore.js"
         ],
-        exclude: [
-          "./node_modules/terraformer/terraformer.js",
-          "./node_modules/terraformer-rtree/index.js",
-          "./src/memory.js"
-        ],
         options: {
           specs: 'spec/*Spec.js',
           helpers: [
-          "./node_modules/terraformer/terraformer.js",
-          "./node_modules/terraformer-rtree/index.js",
-          "./src/memory.js"
-        ],
+            "./node_modules/terraformer/terraformer.js",
+            "./node_modules/terraformer-rtree/index.js",
+            "./src/memory.js"
+          ],
           //keepRunner: true,
           outfile: 'SpecRunner.html',
           template: require('grunt-template-jasmine-istanbul'),
