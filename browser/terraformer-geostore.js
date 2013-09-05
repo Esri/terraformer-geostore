@@ -2,23 +2,18 @@
 
   // Node.
   if(typeof module === 'object' && typeof module.exports === 'object') {
-    exports = module.exports = factory();
-  }
-
-  // AMD.
-  if(typeof define === 'function' && define.amd) {
-    define(["terraformer/terraformer"],factory);
+    exports = module.exports = factory(require("terraformer"));
   }
 
   // Browser Global.
   if(typeof root.navigator === "object") {
-    if (typeof root.Terraformer === "undefined"){
-      root.Terraformer = {};
+    if (!root.Terraformer){
+      throw new Error("Terraformer.GeoStore requires the core Terraformer library. http://github.com/esri/terraformer")
     }
-    root.Terraformer.GeoStore = factory().GeoStore;
+    root.Terraformer.GeoStore = factory(root.Terraformer).GeoStore;
   }
 
-}(this, function() {
+}(this, function(Terraformer) {
 
 // super lightweight async to sync handling
 
@@ -209,24 +204,8 @@ Stream.prototype.unpipe = function (destination) {
   }
 };
 
- 
+
   var exports = { };
-  var Terraformer;
-
-  // Local Reference To Browser Global
-  if(typeof this.navigator === "object") {
-    Terraformer = this.Terraformer;
-  }
-
-  // Setup Node Dependencies
-  if(typeof module === 'object' && typeof module.exports === 'object') {
-    Terraformer = require('terraformer');
-  }
-
-  // Setup AMD Dependencies
-  if(arguments[0] && typeof define === 'function' && define.amd) {
-    Terraformer = arguments[0];
-  }
 
   function bind(obj, fn) {
     var args = arguments.length > 2 ? Array.prototype.slice.call(arguments, 2) : null;
