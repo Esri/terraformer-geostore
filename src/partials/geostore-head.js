@@ -2,20 +2,15 @@
 
   // Node.
   if(typeof module === 'object' && typeof module.exports === 'object') {
-    exports = module.exports = factory();
-  }
-
-  // AMD.
-  if(typeof define === 'function' && define.amd) {
-    define(["terraformer/terraformer"],factory);
+    exports = module.exports = factory(require("terraformer"));
   }
 
   // Browser Global.
   if(typeof root.navigator === "object") {
-    if (typeof root.Terraformer === "undefined"){
-      root.Terraformer = {};
+    if (!root.Terraformer){
+      throw new Error("Terraformer.GeoStore requires the core Terraformer library. http://github.com/esri/terraformer")
     }
-    root.Terraformer.GeoStore = factory().GeoStore;
+    root.Terraformer.GeoStore = factory(root.Terraformer).GeoStore;
   }
 
-}(this, function() {
+}(this, function(Terraformer) {
