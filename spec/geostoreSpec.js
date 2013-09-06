@@ -6,6 +6,7 @@ if(typeof module === "object"){
   Terraformer.Store = {};
   Terraformer.Store.Memory = require("../src/memory.js").Memory;
   Terraformer.GeoStore = require("../node/terraformer-geostore.js").GeoStore;
+  var btree = require("terraformer-geostore-index-btree").BinarySearchTree;
 }
 
 describe("geostore", function() {
@@ -502,6 +503,38 @@ describe("geostore", function() {
     });
   });
 
-  
+  if (btree) {
+    describe("btree tests", function () {
+      it("should be able return the correct Feature with an alternate index after added", function(){
+        gs = new Terraformer.GeoStore({
+          store: new Terraformer.Store.Memory(),
+          index: new Terraformer.RTree()
+        });
+
+
+        gs.addIndex({ property: "name", index: new btree() });
+
+        gs.add({"type":"Feature","id":1,"properties":{"name":"Multnomah"},"geometry":{"type":"Polygon","coordinates":[[[-122.926547,45.725029],[-122.762239,45.730506],[-122.247407,45.549767],[-121.924267,45.648352],[-121.820205,45.462136],[-122.356945,45.462136],[-122.745808,45.434751],[-122.926547,45.725029]]]}});
+        gs.add({"type":"Feature","id":2,"properties":{"name":"Washington"},"geometry":{"type":"Polygon","coordinates":[[[-123.134671,45.779798],[-122.926547,45.725029],[-122.745808,45.434751],[-122.866301,45.319735],[-123.063471,45.401889],[-123.463287,45.434751],[-123.359225,45.779798],[-123.134671,45.779798]]]}});
+
+        gs.within({
+          "type": "Polygon",
+          "coordinates": [ [ [ -122, 45, 0.0 ], [ -123, 45, 0.0 ], [ -123, 46, 0.0 ], [ -122, 46, 0.0 ], [ -122, 45, 0.0 ] ] ]
+        },
+        {
+          "name":
+          {
+            "equals": "Multnomah"
+          }
+        },
+        function (err, res) {
+          expect(res.length).toEqual(1);
+          expect(res.id).toEqual(1);
+        });
+      });
+
+    });
+  }
+
 });
 

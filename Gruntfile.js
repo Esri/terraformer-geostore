@@ -44,7 +44,7 @@ module.exports = function (grunt) {
           specs: 'spec/*Spec.js',
           helpers: [
             "./node_modules/terraformer/terraformer.js",
-            "./node_modules/terraformer-rtree/index.js",
+            "./node_modules/terraformer-rtree/terraformer-geostore-rtree.js",
             "./src/memory.js"
           ],
           //keepRunner: true,
@@ -56,7 +56,7 @@ module.exports = function (grunt) {
             thresholds: {
               lines: 75,
               statements: 75,
-              branches: 75,
+              branches: 55,
               functions: 75
             }
           }
@@ -65,15 +65,7 @@ module.exports = function (grunt) {
     },
 
     jasmine_node: {
-      options: {
-        forceExit: true,
-        match: '.',
-        matchall: false,
-        extensions: 'js',
-        specNameMatcher: 'Spec',
-        helperNameMatcher: 'Helpers'
-      },
-      all: ['spec/']
+      specNameMatcher: "./spec"
     }
   });
 
