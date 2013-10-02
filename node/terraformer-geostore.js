@@ -281,6 +281,7 @@ var Stream = require('stream');
               if (self._stream) {
                 if (completed === found.length) {
                   self._stream.emit("end", primitive);
+                  self._stream = null;
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -292,6 +293,7 @@ var Stream = require('stream');
             if(completed >= found.length){
               if(!errors){
                 if (self._stream) {
+                  self._stream.emit("end");
                   self._stream = null;
                 } else if (callback) {
                   callback( null, results );
@@ -405,11 +407,11 @@ var Stream = require('stream');
           completed++;
           if ( primitive ){
             var geometry = new Terraformer.Primitive(primitive.geometry);
-
             if (geometry.within(shape)){
               if (self._stream) {
                 if (completed === found.length) {
                   self._stream.emit("end", primitive);
+                  self._stream = null;
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -421,6 +423,7 @@ var Stream = require('stream');
             if(completed >= found.length){
               if(!errors){
                 if (self._stream) {
+                  self._stream.emit("end");
                   self._stream = null;
                 } else if (callback) {
                   callback( null, results );
