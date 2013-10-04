@@ -2,7 +2,7 @@
   "name": "terraformer-geostore",
   "version": "1.0.0",
   "description": "GeoStore for Terraformer, helps a geo-database toolkit",
-  "main": "terraformer-geostore.js",
+  "main": "node/terraformer-geostore.js",
   "scripts": {
     "test": "grunt test"
   },
