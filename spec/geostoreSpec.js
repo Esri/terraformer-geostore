@@ -533,6 +533,26 @@ describe("geostore", function() {
         });
       });
 
+      it("should be able remove an entry and have it remove from the alternate index", function(){
+        gs = new Terraformer.GeoStore({
+          store: new Terraformer.Store.Memory(),
+          index: new Terraformer.RTree()
+        });
+
+        var idx = new btree();
+
+        gs.addIndex({ property: "name", index: idx });
+
+        gs.add({"type":"Feature","id":1,"properties":{"name":"Multnomah"},"geometry":{"type":"Polygon","coordinates":[[[-122.926547,45.725029],[-122.762239,45.730506],[-122.247407,45.549767],[-121.924267,45.648352],[-121.820205,45.462136],[-122.356945,45.462136],[-122.745808,45.434751],[-122.926547,45.725029]]]}});
+        gs.add({"type":"Feature","id":2,"properties":{"name":"Washington"},"geometry":{"type":"Polygon","coordinates":[[[-123.134671,45.779798],[-122.926547,45.725029],[-122.745808,45.434751],[-122.866301,45.319735],[-123.063471,45.401889],[-123.463287,45.434751],[-123.359225,45.779798],[-123.134671,45.779798]]]}});
+
+        gs.remove(2);
+
+        idx.contains(2, function (err, data) {
+          expect(data).toEqual(false);
+        });
+      });
+
     });
   }
 
