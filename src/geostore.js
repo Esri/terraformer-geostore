@@ -36,6 +36,15 @@
     }
   }
 
+  function checkIndexAndRemove(index, geojson, callback) {
+    var property = index.property;
+
+    // we do not currently index NULL, might be a TODO in the future
+    if (geojson.properties && geojson.properties[property] !== undefined && geojson.properties[property] !== null) {
+      index.index.remove(geojson.properties[property], geojson.id, callback);
+    }
+  }
+
   // add the geojson object to the store
   // calculate the envelope and add it to the rtree
   // should return a deferred
@@ -121,7 +130,21 @@
           if(error){
             callback("Could not remove from index", null);
           } else {
-            this.store.remove(id, callback);
+            //this.store.remove(id, callback);
+            // check for additional indexes and add to them if there are property matches
+            if (this._additional_indexes && this._additional_indexes.length) {
+              sync = new Sync();
+
+              for (j = 0; j < this._additional_indexes.length; j++) {
+                sync.next(checkIndexAndRemove, this._additional_indexes[j], geojson);
+              }
+
+              sync.start(function () {
+                self.store.remove(id, callback);
+              });
+            } else {
+              this.store.remove(id, callback);
+            }
           }
         }));
       }

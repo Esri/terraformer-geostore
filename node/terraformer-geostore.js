@@ -116,6 +116,15 @@ var Stream = require('stream');
     }
   }
 
+  function checkIndexAndRemove(index, geojson, callback) {
+    var property = index.property;
+
+    // we do not currently index NULL, might be a TODO in the future
+    if (geojson.properties && geojson.properties[property] !== undefined && geojson.properties[property] !== null) {
+      index.index.remove(geojson.properties[property], geojson.id, callback);
+    }
+  }
+
   // add the geojson object to the store
   // calculate the envelope and add it to the rtree
   // should return a deferred
@@ -201,7 +210,21 @@ var Stream = require('stream');
           if(error){
             callback("Could not remove from index", null);
           } else {
-            this.store.remove(id, callback);
+            //this.store.remove(id, callback);
+            // check for additional indexes and add to them if there are property matches
+            if (this._additional_indexes && this._additional_indexes.length) {
+              sync = new Sync();
+
+              for (j = 0; j < this._additional_indexes.length; j++) {
+                sync.next(checkIndexAndRemove, this._additional_indexes[j], geojson);
+              }
+
+              sync.start(function () {
+                self.store.remove(id, callback);
+              });
+            } else {
+              this.store.remove(id, callback);
+            }
           }
         }));
       }
@@ -281,7 +304,6 @@ var Stream = require('stream');
               if (self._stream) {
                 if (completed === found.length) {
                   self._stream.emit("end", primitive);
-                  self._stream = null;
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -293,7 +315,6 @@ var Stream = require('stream');
             if(completed >= found.length){
               if(!errors){
                 if (self._stream) {
-                  self._stream.emit("end");
                   self._stream = null;
                 } else if (callback) {
                   callback( null, results );
@@ -407,11 +428,11 @@ var Stream = require('stream');
           completed++;
           if ( primitive ){
             var geometry = new Terraformer.Primitive(primitive.geometry);
+
             if (geometry.within(shape)){
               if (self._stream) {
                 if (completed === found.length) {
                   self._stream.emit("end", primitive);
-                  self._stream = null;
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -423,7 +444,6 @@ var Stream = require('stream');
             if(completed >= found.length){
               if(!errors){
                 if (self._stream) {
-                  self._stream.emit("end");
                   self._stream = null;
                 } else if (callback) {
                   callback( null, results );
