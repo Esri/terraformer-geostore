@@ -17,7 +17,7 @@ This will create an instance of GeoStore that lives in memory. You can easily wr
 
 ### About Stores
 
-Stores are designed to be syncronous or asyncronous. All methods on `GeoStore` return an instance of `Terraformer.Deferred` a [Promises A](http://wiki.commonjs.org/wiki/Promises/A) compatible object. You can also pass in a Node JS style callback like `function(error, response)`.
+Stores are designed to be asyncronous. All methods on `GeoStore` use a Node JS style callback like `function(error, response)`.
 
 In syncronous stores like `Terraformer.Store.Memory` and `Terraformer.Store.LocalStorage` callbacks are executed immediatly. But in asyncronous stores they might behave like normal async callbacks.
 
