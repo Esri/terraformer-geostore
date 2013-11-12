@@ -4,8 +4,8 @@ if(typeof module === "object"){
   var Terraformer = require("terraformer");
   Terraformer.RTree = require("terraformer-rtree").RTree;
   Terraformer.Store = {};
-  Terraformer.Store.Memory = require("../src/memory.js").Memory;
-  Terraformer.GeoStore = require("../node/terraformer-geostore.js").GeoStore;
+  Terraformer.Store.Memory = require("../src/memory").Memory;
+  Terraformer.GeoStore = require("../node/terraformer-geostore").GeoStore;
 }
 
 describe("geostore", function() {
@@ -502,6 +502,6 @@ describe("geostore", function() {
     });
   });
 
-  
+
 });
 
