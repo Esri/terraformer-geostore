@@ -38,8 +38,6 @@ module.exports = function (grunt) {
     },
 
     jasmine: {
-      src: [
-      ],
       coverage: {
         src: [
           "browser/terraformer-geostore.js"
@@ -60,7 +58,7 @@ module.exports = function (grunt) {
             thresholds: {
               lines: 75,
               statements: 75,
-              branches: 50,
+              branches: 55,
               functions: 75
             }
           }
@@ -74,10 +72,9 @@ module.exports = function (grunt) {
         match: '.',
         matchall: false,
         extensions: 'js',
-        specNameMatcher: 'Spec',
-        helperNameMatcher: 'Helpers'
+        specNameMatcher: 'Spec'
       },
-      all: ['spec/']
+      all: ['./spec/']
     },
 
     s3: {
@@ -99,7 +96,7 @@ module.exports = function (grunt) {
             dest: 'terraformer-geostore/<%= pkg.version %>/terraformer-geostore.min.js'
           }
         ]
-      },
+      }
     }
   });
 
