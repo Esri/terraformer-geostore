@@ -34,10 +34,16 @@ Sync.prototype.done = function (err) {
     if (this._steps.length) {
       var next = this._steps.shift();
       var a = this._arguments[this._current];
-      next.apply(this, this._arguments[this._current]);
+      var self = this;
+
+      function cb (err, data) {
+        self.done(err, data);
+      };
+      a.push(cb);
+      next.apply(this, a);
     } else {
       if (this._callback) {
-        this._callback();
+        this._callback.apply();
       }
     }
   }
@@ -46,10 +52,15 @@ Sync.prototype.done = function (err) {
 Sync.prototype.start = function (callback) {
   this._callback = callback;
 
-  var start = this._steps.shift();
+  var start = this._steps.shift(),
+      self  = this;
 
   if (start) {
     var args = this._arguments[0];
+    function cb (err, data) {
+      self.done(err, data);
+    };
+    args.push(cb);
     start.apply(this, args);
   } else {
     if (this._callback) {

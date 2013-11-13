@@ -346,7 +346,7 @@ describe("geostore", function() {
       var completed = 0;
       var s = gs.createReadStream();
       var spy = jasmine.createSpy();
-      s.on("end", spy);
+      s.on("data", spy);
       gs.within({
         "type": "Polygon",
         "coordinates": [ [ [ -122.655849602879201, 45.538304922840894, 0.0 ], [ -122.655691867426299, 45.538304448196108, 0.0 ], [ -122.655692285611451, 45.538236031205983, 0.0 ], [ -122.655850019628431, 45.538236506773742, 0.0 ], [ -122.655849602879201, 45.538304922840894, 0.0 ] ] ]
@@ -547,7 +547,6 @@ describe("geostore", function() {
         gs.add({"type":"Feature","id":2,"properties":{"name":"Washington"},"geometry":{"type":"Polygon","coordinates":[[[-123.134671,45.779798],[-122.926547,45.725029],[-122.745808,45.434751],[-122.866301,45.319735],[-123.063471,45.401889],[-123.463287,45.434751],[-123.359225,45.779798],[-123.134671,45.779798]]]}});
 
         gs.remove(2);
-
         idx.contains(2, function (err, data) {
           expect(data).toEqual(false);
         });
