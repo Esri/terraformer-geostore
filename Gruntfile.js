@@ -14,7 +14,8 @@ module.exports = function (grunt) {
 
     uglify: {
       options: {
-        report: 'gzip'
+        report: 'gzip',
+        banner: '<%= meta.banner %>'
       },
       geostore: {
         src: ['browser/terraformer-geostore.js'],
