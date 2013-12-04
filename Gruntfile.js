@@ -6,7 +6,7 @@ module.exports = function (grunt) {
     pkg:   grunt.file.readJSON('package.json'),
 
     meta: {
-      banner: '/*! Terraformer JS - <%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+      banner: '/*! Terraformer GeoStore - <%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
         '*   https://github.com/esri/terraformer-geostore\n' +
         '*   Copyright (c) <%= grunt.template.today("yyyy") %> Esri, Inc.\n' +
         '*   Licensed MIT */'
