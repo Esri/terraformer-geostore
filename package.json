@@ -32,6 +32,7 @@
     "grunt-jasmine-node": "https://github.com/magicmoose/grunt-jasmine-node/tarball/master",
     "grunt-template-jasmine-istanbul": "~0.2.5",
     "terraformer-rtree": "~1.0.x",
-    "terraformer-geostore-index-btree": "https://github.com/JerrySievert/terraformer-geostore-index-btree/tarball/master"
+    "terraformer-geostore-index-btree": "https://github.com/JerrySievert/terraformer-geostore-index-btree/tarball/master",
+    "grunt-s3": "~0.2.0-alpha.3"
   }
 }

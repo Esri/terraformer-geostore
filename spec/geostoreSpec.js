@@ -541,4 +541,3 @@ describe("geostore", function() {
     });
   }
 });
-
