@@ -51,10 +51,16 @@ Sync.prototype.done = function (err) {
     if (this._steps.length) {
       var next = this._steps.shift();
       var a = this._arguments[this._current];
-      next.apply(this, this._arguments[this._current]);
+      var self = this;
+
+      function cb (err, data) {
+        self.done(err, data);
+      };
+      a.push(cb);
+      next.apply(this, a);
     } else {
       if (this._callback) {
-        this._callback();
+        this._callback.apply();
       }
     }
   }
@@ -63,10 +69,15 @@ Sync.prototype.done = function (err) {
 Sync.prototype.start = function (callback) {
   this._callback = callback;
 
-  var start = this._steps.shift();
+  var start = this._steps.shift(),
+      self  = this;
 
   if (start) {
     var args = this._arguments[0];
+    function cb (err, data) {
+      self.done(err, data);
+    };
+    args.push(cb);
     start.apply(this, args);
   } else {
     if (this._callback) {
@@ -155,6 +166,7 @@ var Stream = require('stream');
           h: Math.abs(bbox[1] - bbox[3])
         }, feature.id);
       }
+
       if (this._additional_indexes && this._additional_indexes.length) {
         sync = new Sync();
 
@@ -166,9 +178,11 @@ var Stream = require('stream');
           }
         }
 
-        sync.start(function () {
-          self.store.add(geojson, callback);
-        });
+        sync.next(function (geo) {
+          self.store.add(geo);
+        }, geojson);
+
+        sync.start(callback);
       } else {
         this.store.add(geojson, callback);
       }
@@ -190,9 +204,13 @@ var Stream = require('stream');
           sync.next(checkIndexAndAdd, this._additional_indexes[j], geojson);
         }
 
-        sync.start(function () {
-          self.store.add(geojson, callback);
-        });
+        var finished = function (geo, cb) {
+          self.store.add(geo, cb);
+        };
+
+        sync.next(finished, geojson);
+
+        sync.start(callback);
       } else {
         this.store.add(geojson, callback);
       }
@@ -202,6 +220,7 @@ var Stream = require('stream');
   };
 
   GeoStore.prototype.remove = function(id, callback){
+    var self = this;
     this.get(id, bind(this, function(error, geojson){
       if ( error ){
         callback("Could not get feature to remove", null);
@@ -210,7 +229,6 @@ var Stream = require('stream');
           if(error){
             callback("Could not remove from index", null);
           } else {
-            //this.store.remove(id, callback);
             // check for additional indexes and add to them if there are property matches
             if (this._additional_indexes && this._additional_indexes.length) {
               sync = new Sync();
@@ -219,9 +237,12 @@ var Stream = require('stream');
                 sync.next(checkIndexAndRemove, this._additional_indexes[j], geojson);
               }
 
-              sync.start(function () {
-                self.store.remove(id, callback);
-              });
+              var finished = function (geo, cb) {
+                self.store.remove(geo, cb);
+              };
+
+              sync.next(finished, geojson);
+              sync.start(callback);
             } else {
               this.store.remove(id, callback);
             }
@@ -275,11 +296,11 @@ var Stream = require('stream');
             if (self._additional_indexes[i].property === keys[j]) {
               var which = indexQuery[keys[j]], index = self._additional_indexes[i].index;
 
-              sync.next(function (index, which, set, id) {
+              sync.next(function (index, which, set, cb) {
                 var next = this;
                 eliminateForIndex(index, which, set, function (err, newSet) {
                   set = newSet;
-                  next.done(err);
+                  cb(err);
                 });
               }, index, which, set);
             }
@@ -288,7 +309,7 @@ var Stream = require('stream');
 
       }
 
-      sync.start(function () {
+      sync.next(function () {
         // if we have a set, it is our new "found"
         if (set) {
           found = Object.keys(set);
@@ -303,7 +324,8 @@ var Stream = require('stream');
             if (shape.within(geometry)){
               if (self._stream) {
                 if (completed === found.length) {
-                  self._stream.emit("end", primitive);
+                  self._stream.emit("data", primitive);
+                  self._stream.emit("end");
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -358,6 +380,8 @@ var Stream = require('stream');
         }
       });
 
+      sync.start();
+
     }));
   };
 
@@ -404,11 +428,11 @@ var Stream = require('stream');
             if (self._additional_indexes[i].property === keys[j]) {
               var which = indexQuery[keys[j]], index = self._additional_indexes[i].index;
 
-              sync.next(function (index, which, set, id) {
+              sync.next(function (index, which, set, cb) {
                 var next = this;
                 eliminateForIndex(index, which, set, function (err, newSet) {
                   set = newSet;
-                  next.done(err);
+                  cb(err);
                 });
               }, index, which, set);
             }
@@ -417,7 +441,7 @@ var Stream = require('stream');
 
       }
 
-      sync.start(function () {
+      sync.next(function () {
         // if we have a set, it is our new "found"
         if (set) {
           found = Object.keys(set);
@@ -432,7 +456,8 @@ var Stream = require('stream');
             if (geometry.within(shape)){
               if (self._stream) {
                 if (completed === found.length) {
-                  self._stream.emit("end", primitive);
+                  self._stream.emit("done", primitive);
+                  self._stream.emit("end");
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -456,6 +481,8 @@ var Stream = require('stream');
             }
           }
         };
+
+        sync.start();
 
         var error = function(){
           completed++;

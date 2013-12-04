@@ -75,6 +75,7 @@
           h: Math.abs(bbox[1] - bbox[3])
         }, feature.id);
       }
+
       if (this._additional_indexes && this._additional_indexes.length) {
         sync = new Sync();
 
@@ -86,9 +87,11 @@
           }
         }
 
-        sync.start(function () {
-          self.store.add(geojson, callback);
-        });
+        sync.next(function (geo) {
+          self.store.add(geo);
+        }, geojson);
+
+        sync.start(callback);
       } else {
         this.store.add(geojson, callback);
       }
@@ -110,9 +113,13 @@
           sync.next(checkIndexAndAdd, this._additional_indexes[j], geojson);
         }
 
-        sync.start(function () {
-          self.store.add(geojson, callback);
-        });
+        var finished = function (geo, cb) {
+          self.store.add(geo, cb);
+        };
+
+        sync.next(finished, geojson);
+
+        sync.start(callback);
       } else {
         this.store.add(geojson, callback);
       }
@@ -122,6 +129,7 @@
   };
 
   GeoStore.prototype.remove = function(id, callback){
+    var self = this;
     this.get(id, bind(this, function(error, geojson){
       if ( error ){
         callback("Could not get feature to remove", null);
@@ -130,7 +138,6 @@
           if(error){
             callback("Could not remove from index", null);
           } else {
-            //this.store.remove(id, callback);
             // check for additional indexes and add to them if there are property matches
             if (this._additional_indexes && this._additional_indexes.length) {
               sync = new Sync();
@@ -139,9 +146,12 @@
                 sync.next(checkIndexAndRemove, this._additional_indexes[j], geojson);
               }
 
-              sync.start(function () {
-                self.store.remove(id, callback);
-              });
+              var finished = function (geo, cb) {
+                self.store.remove(geo, cb);
+              };
+
+              sync.next(finished, geojson);
+              sync.start(callback);
             } else {
               this.store.remove(id, callback);
             }
@@ -195,11 +205,11 @@
             if (self._additional_indexes[i].property === keys[j]) {
               var which = indexQuery[keys[j]], index = self._additional_indexes[i].index;
 
-              sync.next(function (index, which, set, id) {
+              sync.next(function (index, which, set, cb) {
                 var next = this;
                 eliminateForIndex(index, which, set, function (err, newSet) {
                   set = newSet;
-                  next.done(err);
+                  cb(err);
                 });
               }, index, which, set);
             }
@@ -208,7 +218,7 @@
 
       }
 
-      sync.start(function () {
+      sync.next(function () {
         // if we have a set, it is our new "found"
         if (set) {
           found = Object.keys(set);
@@ -223,7 +233,8 @@
             if (shape.within(geometry)){
               if (self._stream) {
                 if (completed === found.length) {
-                  self._stream.emit("end", primitive);
+                  self._stream.emit("data", primitive);
+                  self._stream.emit("end");
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -278,6 +289,8 @@
         }
       });
 
+      sync.start();
+
     }));
   };
 
@@ -324,11 +337,11 @@
             if (self._additional_indexes[i].property === keys[j]) {
               var which = indexQuery[keys[j]], index = self._additional_indexes[i].index;
 
-              sync.next(function (index, which, set, id) {
+              sync.next(function (index, which, set, cb) {
                 var next = this;
                 eliminateForIndex(index, which, set, function (err, newSet) {
                   set = newSet;
-                  next.done(err);
+                  cb(err);
                 });
               }, index, which, set);
             }
@@ -337,7 +350,7 @@
 
       }
 
-      sync.start(function () {
+      sync.next(function () {
         // if we have a set, it is our new "found"
         if (set) {
           found = Object.keys(set);
@@ -352,7 +365,8 @@
             if (geometry.within(shape)){
               if (self._stream) {
                 if (completed === found.length) {
-                  self._stream.emit("end", primitive);
+                  self._stream.emit("done", primitive);
+                  self._stream.emit("end");
                 } else {
                   self._stream.emit("data", primitive);
                 }
@@ -376,6 +390,8 @@
             }
           }
         };
+
+        sync.start();
 
         var error = function(){
           completed++;
