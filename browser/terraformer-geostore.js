@@ -608,8 +608,6 @@ Stream.prototype.unpipe = function (destination) {
           }
         };
 
-        sync.start();
-
         var error = function(){
           completed++;
           errors++;
@@ -638,9 +636,9 @@ Stream.prototype.unpipe = function (destination) {
             callback(null, results);
           }
         }
-      });
 
-    sync.start();
+        sync.start();
+      });
     }));
 
   };

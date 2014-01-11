@@ -515,6 +515,7 @@ describe("geostore", function() {
           }
         },
         function (err, res) {
+          expect(err).toEqual(null);
           expect(res.length).toEqual(1);
           expect(res.id).toEqual(1);
         });
