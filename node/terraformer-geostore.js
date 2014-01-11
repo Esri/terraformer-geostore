@@ -482,8 +482,6 @@ var Stream = require('stream');
           }
         };
 
-        sync.start();
-
         var error = function(){
           completed++;
           errors++;
@@ -512,8 +510,9 @@ var Stream = require('stream');
             callback(null, results);
           }
         }
-      });
 
+        sync.start();
+      });
     }));
 
   };

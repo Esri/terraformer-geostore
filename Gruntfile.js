@@ -5,20 +5,24 @@ module.exports = function (grunt) {
     pkg:   grunt.file.readJSON('package.json'),
 
     meta: {
-      version: '1.0.0',
-      banner: '/*! Terraformer JS - <%= meta.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-        '*   https://github.com/esri/terraformer-wkt-parser\n' +
+      banner: '/*! Terraformer GeoStore - <%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+        '*   https://github.com/esri/terraformer-geostore\n' +
         '*   Copyright (c) <%= grunt.template.today("yyyy") %> Esri, Inc.\n' +
         '*   Licensed MIT */'
     },
 
     uglify: {
       options: {
-        report: 'gzip'
+        report: 'gzip',
+        banner: '<%= meta.banner %>'
       },
       geostore: {
-        src: ["browser/terraformer-geostore.js"],
+        src: ['browser/terraformer-geostore.js'],
         dest: 'browser/terraformer-geostore.min.js'
+      },
+      versioned: {
+        src: ['browser/terraformer-geostore.js'],
+        dest: 'versions/terraformer-geostore-<%= pkg.version %>.min.js'
       }
     },
 
@@ -34,8 +38,6 @@ module.exports = function (grunt) {
     },
 
     jasmine: {
-      src: [
-      ],
       coverage: {
         src: [
           "browser/terraformer-geostore.js"
@@ -65,16 +67,52 @@ module.exports = function (grunt) {
     },
 
     jasmine_node: {
-      specNameMatcher: "./spec"
+      options: {
+        forceExit: true,
+        match: '.',
+        matchall: false,
+        extensions: 'js',
+        specNameMatcher: 'Spec'
+      },
+      all: ['./spec/']
+    },
+
+    s3: {
+      options: {
+        key: '<%= aws.key %>',
+        secret: '<%= aws.secret %>',
+        bucket: '<%= aws.bucket %>',
+        access: 'public-read',
+        headers: {
+          // 1 Year cache policy (1000 * 60 * 60 * 24 * 365)
+          "Cache-Control": "max-age=630720000, public",
+          "Expires": new Date(Date.now() + 63072000000).toUTCString()
+        }
+      },
+      dev: {
+        upload: [
+          {
+            src: 'versions/terraformer-geostore-<%= pkg.version %>.min.js',
+            dest: 'terraformer-geostore/<%= pkg.version %>/terraformer-geostore.min.js'
+          }
+        ]
+      }
     }
   });
 
+  var awsExists = fs.existsSync(process.env.HOME + '/terraformer-s3.json');
+
+  if (awsExists) {
+    grunt.config.set('aws', grunt.file.readJSON(process.env.HOME + '/terraformer-s3.json'));
+  }
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-jasmine-node');
+  grunt.loadNpmTasks('grunt-s3');
 
   grunt.registerTask('test', [ 'concat', 'jasmine', 'jasmine_node' ]);
-  grunt.registerTask('default', [ 'concat', 'jasmine', 'jasmine_node', 'uglify' ]);
+  grunt.registerTask('default', [ 'test' ]);
+  grunt.registerTask('version', [ 'test', 'uglify', 's3' ]);
 };
