@@ -640,6 +640,7 @@ Stream.prototype.unpipe = function (destination) {
         }
       });
 
+    sync.start();
     }));
 
   };
