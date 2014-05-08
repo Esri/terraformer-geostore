@@ -391,8 +391,6 @@
           }
         };
 
-        sync.start();
-
         var error = function(){
           completed++;
           errors++;
@@ -422,6 +420,8 @@
           }
         }
       });
+
+      sync.start();
 
     }));
 
