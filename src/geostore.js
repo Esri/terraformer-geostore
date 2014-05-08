@@ -419,10 +419,10 @@
             callback(null, results);
           }
         }
+
       });
 
       sync.start();
-
     }));
 
   };

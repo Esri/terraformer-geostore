@@ -636,10 +636,10 @@ Stream.prototype.unpipe = function (destination) {
             callback(null, results);
           }
         }
+
       });
 
       sync.start();
-
     }));
 
   };

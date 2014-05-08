@@ -510,10 +510,10 @@ var Stream = require('stream');
             callback(null, results);
           }
         }
+
       });
 
       sync.start();
-
     }));
 
   };
