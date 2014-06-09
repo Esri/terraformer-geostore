@@ -420,8 +420,9 @@
           }
         }
 
-        sync.start();
       });
+
+      sync.start();
     }));
 
   };

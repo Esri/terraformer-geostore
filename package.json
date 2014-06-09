@@ -1,6 +1,6 @@
 {
   "name": "terraformer-geostore",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "GeoStore for Terraformer, helps a geo-database toolkit",
   "main": "node/terraformer-geostore.js",
   "scripts": {

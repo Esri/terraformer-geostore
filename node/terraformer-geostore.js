@@ -511,8 +511,9 @@ var Stream = require('stream');
           }
         }
 
-        sync.start();
       });
+
+      sync.start();
     }));
 
   };
