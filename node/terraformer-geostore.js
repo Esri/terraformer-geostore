@@ -15,80 +15,8 @@
 
 }(this, function(Terraformer) {
 
-// super lightweight async to sync handling
-
-function Sync () {
-	this._steps = [ ];
-  this._arguments = [ ];
-  this._current = 0;
-  this._error = null;
-}
-
-Sync.prototype.next = function () {
-  var args = Array.prototype.slice.call(arguments);
-  this._steps.push(args.shift());
-  this._arguments[this._steps.length - 1] = args;
-
-  return this;
-};
-
-Sync.prototype.error = function (error) {
-  this._error = error;
-
-  return this;
-};
-
-Sync.prototype.done = function (err) {
-  this._current++;
-  var args = Array.prototype.slice.call(arguments);
-
-  // if there is an error, we are done
-  if (err) {
-    if (this._error) {
-      this._error.apply(this, args);
-    }
-  } else {
-    if (this._steps.length) {
-      var next = this._steps.shift();
-      var a = this._arguments[this._current];
-      var self = this;
-
-      function cb (err, data) {
-        self.done(err, data);
-      };
-      a.push(cb);
-      next.apply(this, a);
-    } else {
-      if (this._callback) {
-        this._callback.apply();
-      }
-    }
-  }
-};
-
-Sync.prototype.start = function (callback) {
-  this._callback = callback;
-
-  var start = this._steps.shift(),
-      self  = this;
-
-  if (start) {
-    var args = this._arguments[0];
-    function cb (err, data) {
-      self.done(err, data);
-    };
-    args.push(cb);
-    start.apply(this, args);
-  } else {
-    if (this._callback) {
-      this._callback();
-    }
-  }
-};
-
-
 var Stream = require('stream');
-
+var dblite = require('dblite');
 
   var exports = { };
 
@@ -115,7 +43,7 @@ var Stream = require('stream');
     this.store = config.store;
     this._stream = null;
 
-    this._additional_indexes = [ ];
+    this.indexStore = new dblite.indexStore();
   }
 
   function checkIndexAndAdd(index, geojson, callback) {
@@ -153,6 +81,8 @@ var Stream = require('stream');
 
     // set a bounding box
     if(geojson.type === "FeatureCollection"){
+      var count = 0;
+
       for (i = 0; i < geojson.features.length; i++) {
         feature = geojson.features[i];
         bbox = Terraformer.Tools.calculateBounds(feature);
@@ -165,26 +95,13 @@ var Stream = require('stream');
           w: Math.abs(bbox[0] - bbox[2]),
           h: Math.abs(bbox[1] - bbox[3])
         }, feature.id);
-      }
 
-      if (this._additional_indexes && this._additional_indexes.length) {
-        sync = new Sync();
-
-        for (i = 0; i < geojson.features.length; i++) {
-          feature = geojson.features[i];
-
-          for (j = 0; j < this._additional_indexes.length; j++) {
-            sync.next(checkIndexAndAdd, this._additional_indexes[j], feature);
+        this.indexStore.add(feature.id, feature, function () {
+          count++;
+          if (count === geojson.features.length) {
+            self.store.add(geojson, callback);
           }
-        }
-
-        sync.next(function (geo) {
-          self.store.add(geo);
-        }, geojson);
-
-        sync.start(callback);
-      } else {
-        this.store.add(geojson, callback);
+        });
       }
     } else {
       bbox = Terraformer.Tools.calculateBounds(geojson);
@@ -196,27 +113,10 @@ var Stream = require('stream');
         h: Math.abs(bbox[1] - bbox[3])
       }, geojson.id);
 
-      // check for additional indexes and add to them if there are property matches
-      if (this._additional_indexes && this._additional_indexes.length) {
-        sync = new Sync();
-
-        for (j = 0; j < this._additional_indexes.length; j++) {
-          sync.next(checkIndexAndAdd, this._additional_indexes[j], geojson);
-        }
-
-        var finished = function (geo, cb) {
-          self.store.add(geo, cb);
-        };
-
-        sync.next(finished, geojson);
-
-        sync.start(callback);
-      } else {
+      this.indexStore.add(geojson.id, geojson, function () {
         this.store.add(geojson, callback);
-      }
+      });
     }
-
-    // store the data (use the stores store method to decide how to do this.)
   };
 
   GeoStore.prototype.remove = function(id, callback){
@@ -229,23 +129,9 @@ var Stream = require('stream');
           if(error){
             callback("Could not remove from index", null);
           } else {
-            // check for additional indexes and add to them if there are property matches
-            if (this._additional_indexes && this._additional_indexes.length) {
-              sync = new Sync();
-
-              for (j = 0; j < this._additional_indexes.length; j++) {
-                sync.next(checkIndexAndRemove, this._additional_indexes[j], geojson);
-              }
-
-              var finished = function (geo, cb) {
-                self.store.remove(geo, cb);
-              };
-
-              sync.next(finished, geojson);
-              sync.start(callback);
-            } else {
+            this.indexStore.remove(id, geojson, function () {
               this.store.remove(id, callback);
-            }
+            });
           }
         }));
       }
