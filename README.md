@@ -10,7 +10,7 @@ This package is part of the [Terraformer](http://terraformer.io) project.
 
 ```
 $ npm install terraformer-geostore
-$ npm install terraformer-geostore-rtree
+$ npm install terraformer-rtree
 $ npm install terraformer-geostore-memory
 ```
 
@@ -22,7 +22,7 @@ You can use [Bower](http://bower.io/) to install the components if you like or d
 
 ```
 $ bower install terraformer-geostore
-$ bower install terraformer-geostore-rtree
+$ bower install terraformer-rtree
 $ bower install terraformer-geostore-memory
 ```
 
