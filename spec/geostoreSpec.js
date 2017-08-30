@@ -506,7 +506,7 @@ describe("geostore", function() {
 
         gs.within({
           "type": "Polygon",
-          "coordinates": [ [ [ -122, 45, 0.0 ], [ -123, 45, 0.0 ], [ -123, 46, 0.0 ], [ -122, 46, 0.0 ], [ -122, 45, 0.0 ] ] ]
+          "coordinates": [ [ [ -121, 45, 0.0 ], [ -123, 45, 0.0 ], [ -123, 46, 0.0 ], [ -121, 46, 0.0 ], [ -121, 45, 0.0 ] ] ]
         },
         {
           "name":
@@ -517,7 +517,7 @@ describe("geostore", function() {
         function (err, res) {
           expect(err).toEqual(null);
           expect(res.length).toEqual(1);
-          expect(res.id).toEqual(1);
+          expect(res[0].id).toEqual(1);
         });
       });
 
