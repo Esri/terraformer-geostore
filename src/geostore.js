@@ -161,15 +161,10 @@
     }));
   };
 
-  GeoStore.prototype.contains = function(geojson){
-    var args = Array.prototype.slice.call(arguments);
-    args.shift();
-
-    var callback = args.pop();
-    if (args.length) {
-      var indexQuery = args[0];
+  GeoStore.prototype._genericSpatialOperation = function (geojson, search, operationName, callback) {
+    if (search) {
+      var indexQuery = search;
     }
-
 
     // make a new deferred
     var shape = new Terraformer.Primitive(geojson);
@@ -229,8 +224,7 @@
           completed++;
           if ( primitive ){
             var geometry = new Terraformer.Primitive(primitive.geometry);
-
-            if (shape.within(geometry)){
+            if (shape[operationName](geometry)){
               if (self._stream) {
                 if (completed === found.length) {
                   self._stream.emit("data", primitive);
@@ -292,6 +286,30 @@
       sync.start();
 
     }));
+  };
+
+  GeoStore.prototype.intersects = function (geojson) {
+    var args = Array.prototype.slice.call(arguments);
+    args.shift();
+
+    var callback = args.pop();
+    if (args.length) {
+      var search = args[0];
+    }
+
+    return this._genericSpatialOperation(geojson, search || null, 'intersects', callback);
+  };
+
+  GeoStore.prototype.contains = function (geojson) {
+    var args = Array.prototype.slice.call(arguments);
+    args.shift();
+
+    var callback = args.pop();
+    if (args.length) {
+      var search = args[0];
+    }
+
+    return this._genericSpatialOperation(geojson, search || null, 'within', callback);
   };
 
   GeoStore.prototype.within = function(geojson){
