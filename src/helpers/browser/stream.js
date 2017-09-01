@@ -9,11 +9,7 @@ function Stream () {
   this.emit = function (signal, data) {
     var i;
 
-    if (signal === "data") {
-      for (i = self._destination.length; i--;) {
-        self._destination[i].write(data);
-      }
-    } else if (signal === "end") {
+    if (signal === "data" || signal === "end") {
       for (i = self._destination.length; i--;) {
         self._destination[i].write(data);
       }

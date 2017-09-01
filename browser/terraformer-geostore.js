@@ -186,11 +186,7 @@ function Stream () {
   this.emit = function (signal, data) {
     var i;
 
-    if (signal === "data") {
-      for (i = self._destination.length; i--;) {
-        self._destination[i].write(data);
-      }
-    } else if (signal === "end") {
+    if (signal === "data" || signal === "end") {
       for (i = self._destination.length; i--;) {
         self._destination[i].write(data);
       }
@@ -267,82 +263,61 @@ Stream.prototype.unpipe = function (destination) {
   // should return a deferred
   GeoStore.prototype.add = function(geojson, callback){
 
-    var bbox, sync, i, j, feature, self = this;
+    var sync, finished, i, self = this;
+    var addFeature = function(feature) {
+      var bbox = Terraformer.Tools.calculateBounds(feature);
+      if(!feature.id) {
+        throw new Error("Terraform.GeoStore : Feature does not have an id property");
+      }
+      // TODO: if we want to be atomic and consistent, this should be truly synchronous
+      self.index.insert({
+        x: bbox[0],
+        y: bbox[1],
+        w: Math.abs(bbox[0] - bbox[2]),
+        h: Math.abs(bbox[1] - bbox[3])
+      }, feature.id);
+    };
+    var syncIndexes = function(feature) {
+      for (var j = 0; j < self._additional_indexes.length; j++) {
+        sync.next(checkIndexAndAdd, self._additional_indexes[j], feature);
+      }
+    }
 
     if (!geojson.type.match(/Feature/)) {
       throw new Error("Terraform.GeoStore : only Features and FeatureCollections are supported");
     }
 
-    if(geojson.type === "Feature" && !geojson.id) {
-      throw new Error("Terraform.GeoStore : Feature does not have an id property");
+    if (this._additional_indexes && this._additional_indexes.length) {
+      sync = new Sync();
     }
 
     // set a bounding box
     if(geojson.type === "FeatureCollection"){
       for (i = 0; i < geojson.features.length; i++) {
-        feature = geojson.features[i];
-        bbox = Terraformer.Tools.calculateBounds(feature);
-        if(!feature.id) {
-          throw new Error("Terraform.GeoStore : Feature does not have an id property");
-        }
-        this.index.insert({
-          x: bbox[0],
-          y: bbox[1],
-          w: Math.abs(bbox[0] - bbox[2]),
-          h: Math.abs(bbox[1] - bbox[3])
-        }, feature.id);
-      }
-
-      if (this._additional_indexes && this._additional_indexes.length) {
-        sync = new Sync();
-
-        for (i = 0; i < geojson.features.length; i++) {
-          feature = geojson.features[i];
-
-          for (j = 0; j < this._additional_indexes.length; j++) {
-            sync.next(checkIndexAndAdd, this._additional_indexes[j], feature);
-          }
-        }
-
-        sync.next(function (geo) {
-          self.store.add(geo);
-        }, geojson);
-
-        sync.start(callback);
-      } else {
-        this.store.add(geojson, callback);
+        addFeature(geojson.features[i]);
       }
     } else {
-      bbox = Terraformer.Tools.calculateBounds(geojson);
-      // TODO: if we want to be atomic and consistent, this should be truly synchronous
-      this.index.insert({
-        x: bbox[0],
-        y: bbox[1],
-        w: Math.abs(bbox[0] - bbox[2]),
-        h: Math.abs(bbox[1] - bbox[3])
-      }, geojson.id);
-
-      // check for additional indexes and add to them if there are property matches
-      if (this._additional_indexes && this._additional_indexes.length) {
-        sync = new Sync();
-
-        for (j = 0; j < this._additional_indexes.length; j++) {
-          sync.next(checkIndexAndAdd, this._additional_indexes[j], geojson);
+      addFeature(geojson);
+    }
+    if (sync) {
+      if(geojson.type === "FeatureCollection"){
+        for (i = 0; i < geojson.features.length; i++) {
+          syncIndexes(geojson.features[i]);
         }
-
-        var finished = function (geo, cb) {
+        finished = function (geo) {
+          self.store.add(geo);
+        };
+      } else {
+        syncIndexes(geojson);
+        finished = function (geo, cb) {
           self.store.add(geo, cb);
         };
-
-        sync.next(finished, geojson);
-
-        sync.start(callback);
-      } else {
-        this.store.add(geojson, callback);
       }
+      sync.next(finished, geojson);
+      sync.start(callback);
+    } else {
+      this.store.add(geojson, callback);
     }
-
-    // store the data (use the stores store method to decide how to do this.)
   };
 
   GeoStore.prototype.remove = function(id, callback){
