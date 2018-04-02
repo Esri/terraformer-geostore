@@ -1,9 +1,0 @@
-{
-  "name": "terraformer-geostore",
-  "version": "1.0.4",
-  "main": "browser/terraformer-geostore.min.js",
-  "ignore"        : ["versions", "spec", "node"],
-  "dependencies": {
-    "terraformer": "~1.0.1"
-  }
-}
