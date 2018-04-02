@@ -1,14 +1,22 @@
-# GeoStore
+[![npm][npm-image]][npm-url]
+[![travis][travis-image]][travis-url]
+
+[npm-image]: https://img.shields.io/npm/v/terraformer-geostore.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/terraformer-geostore
+[travis-image]: https://img.shields.io/travis/Esri/terraformer-geostore/master.svg?style=flat-square
+[travis-url]: https://travis-ci.org/Esri/terraformer-geostore
+
+# terraformer-geostore
 
 This package is part of the [Terraformer](http://terraformer.io) project.
 
-`Terraformer.GeoStore` is a class built for handing lightweight storage and querying of large amounts of [GeoJSON Features](http://www.geojson.org/geojson-spec.html#feature-objects). It is very fast and index the [rough US counties data](https://github.com/Esri/Terraformer/blob/master/examples/geostore/counties_rough.json) (about 950k) in about 120ms and search for which county contains a point in about 6.5ms. These numbers are form the latest version of Chrome.
+`Terraformer.GeoStore` is a class built for handing lightweight storage and querying large numbers of [GeoJSON Features](http://www.geojson.org/geojson-spec.html#feature-objects). It is very fast and can index the [rough US counties data](https://github.com/Esri/Terraformer/blob/master/examples/geostore/counties_rough.json) (~950k features) in about 120ms and do a point in polygon search contains a point in ~6.5ms.
 
 ## Installing
 
 ### Node.js
 
-```
+```bash
 $ npm install terraformer-geostore
 $ npm install terraformer-rtree
 $ npm install terraformer-geostore-memory
@@ -20,10 +28,10 @@ In the browser, [Terraformer](http://github.com/esri/terraformer) is required.
 
 You can use [Bower](http://bower.io/) to install the components if you like or download them and host them yourself.
 
-```
-$ bower install terraformer-geostore
-$ bower install terraformer-rtree
-$ bower install terraformer-geostore-memory
+```html
+<script src="https://unpkg.com/terraformer@1.0.8"></script>
+<script src="https://unpkg.com/terraformer-rtree@1.0.0"></script>
+<script src="https://unpkg.com/terraformer-geostore-memory@1.0.0"></script>
 ```
 
 ## Documentation
@@ -53,7 +61,7 @@ store.add({
   // callback when the geojson is added
 });
 
-// You can also add FeatureCollections of multiple Features
+// You can also add a FeatureCollection
 store.add({
   "type": "FeatureCollection",
   "features": [
@@ -108,7 +116,8 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 
 ## Contributing
 
-Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/esri/contributing).
+Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/Esri/contributing).
 
-[](Esri Tags: Terraformer GeoJSON GeoStore)
-[](Esri Language: JavaScript)
+## Licensing
+
+A copy of the license is available in the repository's [LICENSE](./LICENSE) file.

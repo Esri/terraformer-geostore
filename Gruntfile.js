@@ -56,47 +56,47 @@ module.exports = function (grunt) {
             coverage: './coverage/coverage.json',
             report: './coverage',
             thresholds: {
-              lines: 75,
-              statements: 75,
-              branches: 55,
-              functions: 75
+              lines: 60,
+              statements: 60,
+              branches: 40,
+              functions: 60
             }
           }
         }
       }
     },
 
-    jasmine_node: {
-      options: {
-        forceExit: true,
-        match: '.',
-        matchall: false,
-        extensions: 'js',
-        specNameMatcher: 'Spec'
-      },
-      all: ['./spec/']
-    },
-
-    s3: {
-      options: {
-        key: '<%= aws.key %>',
-        secret: '<%= aws.secret %>',
-        bucket: '<%= aws.bucket %>',
-        access: 'public-read',
-        headers: {
-          // 1 Year cache policy (1000 * 60 * 60 * 24 * 365)
-          "Cache-Control": "max-age=630720000, public",
-          "Expires": new Date(Date.now() + 63072000000).toUTCString()
+    // lets use jasmine 2.0!
+    jasmine_nodejs: {
+        // task specific (default) options
+        options: {
+            useHelpers: true,
+            // global helpers, available to all task targets. accepts globs..
+            helpers: [],
+            random: false,
+            seed: null,
+            defaultTimeout: null, // defaults to 5000
+            stopOnFailure: false,
+            traceFatal: true,
+            // configure one or more built-in reporters
+            reporters: {
+                console: {
+                    colors: true,        // (0|false)|(1|true)|2
+                    cleanStack: 1,       // (0|false)|(1|true)|2|3
+                    verbosity: 4,        // (0|false)|1|2|3|(4|true)
+                    listStyle: "indent", // "flat"|"indent"
+                    activity: false
+                }
+            },
+            // add custom Jasmine reporter(s)
+            customReporters: []
+        },
+        your_target: {
+            // spec files
+            specs: [
+                "./spec/**"
+            ]
         }
-      },
-      dev: {
-        upload: [
-          {
-            src: 'versions/terraformer-geostore-<%= pkg.version %>.min.js',
-            dest: 'terraformer-geostore/<%= pkg.version %>/terraformer-geostore.min.js'
-          }
-        ]
-      }
     }
   });
 
@@ -109,10 +109,9 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.loadNpmTasks('grunt-jasmine-node');
-  grunt.loadNpmTasks('grunt-s3');
+  grunt.loadNpmTasks('grunt-jasmine-nodejs');
 
-  grunt.registerTask('test', [ 'concat', 'jasmine', 'jasmine_node' ]);
+  grunt.registerTask('test', [ 'concat', 'jasmine', 'jasmine_nodejs' ]);
   grunt.registerTask('default', [ 'test' ]);
-  grunt.registerTask('version', [ 'test', 'uglify', 's3' ]);
+  grunt.registerTask('version', [ 'test', 'uglify' ]);
 };

@@ -67,7 +67,7 @@ describe("geostore", function() {
           {"type":"Feature","id":"41005","properties":{"name":"Clackamas"},"geometry":{"type":"Polygon","coordinates":[[[-122.356945,45.462136],[-121.820205,45.462136],[-121.694236,45.259489],[-121.732574,44.887057],[-122.395284,44.887057],[-122.84987,45.259489],[-122.866301,45.319735],[-122.745808,45.434751],[-122.356945,45.462136]]]}}
         ]
       }, spy);
-      expect(spy.callCount).toEqual(1);
+      expect(spy.calls.count()).toEqual(1);
       expect(gs.store.data[41067]).toBeTruthy();
       expect(gs.store.data[41005]).toBeTruthy();
     });
@@ -98,7 +98,7 @@ describe("geostore", function() {
       var result;
       var spy = jasmine.createSpy();
       gs.remove("41051", spy);
-      expect(spy.callCount).toEqual(1);
+      expect(spy.calls.count()).toEqual(1);
       expect(gs.store.data[41051]).toBeFalsy();
       expect(gs.store.data[41067]).toBeTruthy();
     });
@@ -124,7 +124,7 @@ describe("geostore", function() {
       var result;
       var spy = jasmine.createSpy();
       gs.update({"type":"Feature","id":"41067","properties":{"name":"Multnomah"},"geometry":{"type":"Polygon","coordinates":[[[-122.926547,45.725029],[-122.762239,45.730506],[-122.247407,45.549767],[-121.924267,45.648352],[-121.820205,45.462136],[-122.356945,45.462136],[-122.745808,45.434751],[-122.926547,45.725029]]]}}, spy);
-      expect(spy.callCount).toEqual(1);
+      expect(spy.calls.count()).toEqual(1);
       gs.contains({
         type:"Point",
         coordinates: [-122.676048, 45.516544]
@@ -137,7 +137,7 @@ describe("geostore", function() {
     it("should update features in store and run a callback", function(){
       var spy = jasmine.createSpy();
       gs.update({"type":"Feature","id":"41067","properties":{"name":"Multnomah"},"geometry":{"type":"Polygon","coordinates":[[[-122.926547,45.725029],[-122.762239,45.730506],[-122.247407,45.549767],[-121.924267,45.648352],[-121.820205,45.462136],[-122.356945,45.462136],[-122.745808,45.434751],[-122.926547,45.725029]]]}}, spy);
-      expect(spy.callCount).toEqual(1);
+      expect(spy.calls.count()).toEqual(1);
     });
 
     var serial;
@@ -271,7 +271,7 @@ describe("geostore", function() {
         }).toThrow();
       });
 
-      it("should throw an error when a GeoJSON object that is not a feature or a feautre collections is updated", function(){
+      it("should throw an error when a GeoJSON object that is not a feature or a feature collection is updated", function(){
         expect(function() {
           gs.update({"type":"Polygon","coordinates":[[[-122.926547,45.725029],[-122.762239,45.730506],[-122.247407,45.549767],[-121.924267,45.648352],[-121.820205,45.462136],[-122.356945,45.462136],[-122.745808,45.434751],[-122.926547,45.725029]]]});
         }).toThrow();
@@ -386,6 +386,7 @@ describe("geostore", function() {
         }
       },
       function (err, res) {
+        expect(err).toEqual(undefined);
         expect(res.length).toEqual(0);
       });
     });
@@ -404,7 +405,9 @@ describe("geostore", function() {
         }
       },
       function (err, res) {
-        expect(res.length).toEqual(1);
+        if (!err) {
+          expect(res.length).toEqual(1);
+        }
       });
     });
 
