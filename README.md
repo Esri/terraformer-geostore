@@ -17,6 +17,7 @@ This package is part of the [Terraformer](http://terraformer.io) project.
 ### Node.js
 
 ```bash
+$ npm install terraformer
 $ npm install terraformer-geostore
 $ npm install terraformer-rtree
 $ npm install terraformer-geostore-memory
@@ -29,9 +30,10 @@ In the browser, [Terraformer](http://github.com/esri/terraformer) is required.
 You can use [Bower](http://bower.io/) to install the components if you like or download them and host them yourself.
 
 ```html
-<script src="https://unpkg.com/terraformer@1.0.8"></script>
-<script src="https://unpkg.com/terraformer-rtree@1.0.0"></script>
-<script src="https://unpkg.com/terraformer-geostore-memory@1.0.0"></script>
+<script src="https://unpkg.com/terraformer"></script>
+<script src="https://unpkg.com/terraformer-geostore"></script>
+<script src="https://unpkg.com/terraformer-rtree"></script>
+<script src="https://unpkg.com/terraformer-geostore-memory"></script>
 ```
 
 ## Documentation
@@ -40,7 +42,7 @@ For a full guide to GeoStore check out the [Terraformer website](http://terrafor
 
 ```js
 var store = new Terraformer.GeoStore({
-  store: new Terraformer.Store.Memory(),
+  store: new Terraformer.GeoStore.Memory(),
   index: new Terraformer.RTree()
 });
 
