@@ -1,3 +1,7 @@
+# Important!
+
+This repo is part of the Terraformer project which has been archived. See https://github.com/Esri/terraformer#important for more details.
+
 [![npm][npm-image]][npm-url]
 [![travis][travis-image]][travis-url]
 
@@ -7,8 +11,6 @@
 [travis-url]: https://travis-ci.org/Esri/terraformer-geostore
 
 # terraformer-geostore
-
-This package is part of the [Terraformer](http://terraformer.io) project.
 
 `Terraformer.GeoStore` is a class built for handing lightweight storage and querying large numbers of [GeoJSON Features](http://www.geojson.org/geojson-spec.html#feature-objects). It is very fast and can index the [rough US counties data](https://github.com/Esri/Terraformer/blob/master/examples/geostore/counties_rough.json) (~950k features) in about 120ms and do a point in polygon search contains a point in ~6.5ms.
 
@@ -38,7 +40,7 @@ You can use [Bower](http://bower.io/) to install the components if you like or d
 
 ## Documentation
 
-For a full guide to GeoStore check out the [Terraformer website](http://terraformer.io/geostore/).
+For a full guide to GeoStore check out the [Terraformer website](https://github.com/Esri/terraformer/blob/master/docs/geostore.md).
 
 ```js
 var store = new Terraformer.GeoStore({
@@ -106,11 +108,6 @@ store.within({
   };
 });
 ```
-
-## Resources
-
-* [Terraformer Website](http://terraformer.io)
-* [twitter@EsriPDX](http://twitter.com/esripdx)
 
 ## Issues
 
